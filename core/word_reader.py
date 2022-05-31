@@ -70,7 +70,7 @@ class TableParser:
     def parse_line(self, row):
         '''Parses table lines'''
     
-        return {cell.text : cell for cell in row.cells}
+        return [{'text' : cell.text, 'val' : cell} for cell in row.cells]
 
     
     def parse_table(self, table):
@@ -79,12 +79,10 @@ class TableParser:
         
         data = []
         for i, row in enumerate(table.rows):
-            if i == 0:
-                col_names = self.parse_line(row)
-            else:
-                line = self.parse_line(row)
-                data.append(line)
-        return data, col_names
+           
+            line = self.parse_line(row)
+            data.append(line)
+        return data
 
     def __call__(self):
 
@@ -94,9 +92,9 @@ class TableParser:
             yield self.parse_table(table)
 
 
-def table_generator():
+def table_generator(doc=None):
 
-    t = TableParser()
+    t = TableParser(doc)
 
     return t()
 

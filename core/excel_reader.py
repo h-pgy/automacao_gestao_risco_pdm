@@ -60,7 +60,21 @@ class ExcelReader:
 
         return df
 
-            
+    def drop_missing_periogo(self, df):
+
+        df = df[df['periodo'].notnull()].copy().reset_index(drop=True)
+
+        return df
+
+    def criar_mes_e_ano(self, df):
+
+        df = df.copy()
+
+        df['mes'] = df['periodo'].apply(lambda x: x.month)
+        df['ano'] = df['periodo'].apply(lambda x: x.year)
+
+        return df
+
     
     def read_sheet(self, sheet_name):
 
@@ -73,5 +87,9 @@ class ExcelReader:
                          skiprows=[0,1], header=0)
 
         df = self.padronizar_colunas(df)
+        df = self.drop_missing_periogo(df)
+        df = self.criar_mes_e_ano(df)
+
+        df = df.set_index([df['ano'], df['mes']])
         
         return df
