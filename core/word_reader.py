@@ -1,6 +1,7 @@
 from pydoc import Doc
 import pandas as pd
 from docx import Document
+from docx.document import Document as doc_type
 from .utils import list_files
 
 
@@ -51,11 +52,10 @@ class TableParser:
             read_doc = WordReader()
             doc = read_doc()
         
-        if not (type(doc) is Document):
+        if not (type(doc) is doc_type):
             raise ValueError("Doc must be a pydocx document!")
 
         self.doc = doc
-
 
     def get_tables(self, doc=None):
         '''Lists document tables'''
@@ -70,12 +70,12 @@ class TableParser:
     def parse_line(self, row):
         '''Parses table lines'''
     
-        return [cell.text for cell in row.cells]
+        return {cell.text : cell for cell in row.cells}
 
     
     def parse_table(self, table):
-        '''Parses document table, return two lists: a list of lists (rows)
-        as the data, and the col_names as a list of strings'''
+        '''Parses document table, returns a list of dicts, each dict represneting the value 
+        and the correspondign cell in the word doc as the data, and col_names as a list of strings'''
         
         data = []
         for i, row in enumerate(table.rows):
@@ -85,6 +85,20 @@ class TableParser:
                 line = self.parse_line(row)
                 data.append(line)
         return data, col_names
+
+    def __call__(self):
+
+        tables = self.get_tables()
+
+        for table in tables:
+            yield self.parse_table(table)
+
+
+def table_generator():
+
+    t = TableParser()
+
+    return t()
 
     
 
